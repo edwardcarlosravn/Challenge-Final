@@ -1,0 +1,239 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  CLIENT
+  EDITOR
+}
+
+enum OTPType {
+  otp
+  reset_password
+}
+
+enum AccountStatus {
+  VERIFIED
+  UNVERIFIED
+}
+
+model OTP {
+  id        Int      @id @default(autoincrement())
+  type      OTPType
+  token     String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type])
+}
+
+model User {
+  id                 Int            @id @default(autoincrement())
+  email              String         @unique
+  password           String
+  hashedRefreshToken String?
+  role               Role           @default(CLIENT)
+  accountStatus      AccountStatus  @default(UNVERIFIED)
+  first_name         String?        @db.VarChar(100)
+  last_name          String?        @db.VarChar(100)
+  phone              String?        @db.VarChar(20)
+  is_active          Boolean        @default(true)
+  created_at         DateTime       @default(now())
+  deleted_at         DateTime?
+  updated_at         DateTime       @default(now()) @updatedAt
+  otps               OTP[]
+  shoppingCarts      ShoppingCart[]
+  shopOrders         ShopOrder[]
+  favorites          UserFavorite[]
+  stockAlerts        StockAlert[]
+}
+
+model Product {
+  id          String             @id @default(uuid())
+  name        String             @unique @db.VarChar(255)
+  description String?
+  is_active   Boolean            @default(true)
+  created_at  DateTime           @default(now())
+  updated_at  DateTime           @default(now()) @updatedAt
+  categories  ProductCategory[]
+  variations  ProductVariation[]
+}
+
+model ProductCategory {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique @db.VarChar(100)
+  slug        String    @unique @db.VarChar(100)
+  is_active   Boolean   @default(true)
+  description String?
+  created_at  DateTime  @default(now())
+  products    Product[]
+}
+
+model ProductVariation {
+  id        String           @id @default(uuid())
+  productId String
+  is_active Boolean          @default(true)
+  product   Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
+  items     ProductItem[]
+  images    VariationImage[]
+}
+
+model VariationImage {
+  id          Int              @id @default(autoincrement())
+  variationId String
+  s3Key       String           @db.VarChar(255)
+  alt_text    String?          @db.VarChar(255)
+  created_at  DateTime         @default(now())
+  variation   ProductVariation @relation(fields: [variationId], references: [id], onDelete: Cascade)
+}
+
+model ProductItem {
+  id          Int                    @id @default(autoincrement())
+  variationId String
+  sku         String                 @unique @db.VarChar(50)
+  price       Decimal                @db.Decimal(10, 2)
+  stock       Int                    @default(0)
+  variation   ProductVariation       @relation(fields: [variationId], references: [id], onDelete: Cascade)
+  attributes  ProductItemAttribute[]
+  cartItems   ShoppingCartItem[]
+  orderLines  OrderLine[]
+  favorites   UserFavorite[]
+  stockAlerts StockAlert[]
+
+  @@index([stock], name: "idx_product_item_stock")
+}
+
+model Attribute {
+  id     Int              @id @default(autoincrement())
+  name   String           @unique @db.VarChar(50)
+  values AttributeValue[]
+}
+
+model AttributeValue {
+  id                    Int                    @id @default(autoincrement())
+  attributeId           Int
+  value                 String                 @db.VarChar(50)
+  attribute             Attribute              @relation(fields: [attributeId], references: [id])
+  productItemAttributes ProductItemAttribute[]
+
+  @@unique([attributeId, value])
+}
+
+model ProductItemAttribute {
+  productItemId    Int
+  attributeValueId Int
+  productItem      ProductItem    @relation(fields: [productItemId], references: [id], onDelete: Cascade)
+  attributeValue   AttributeValue @relation(fields: [attributeValueId], references: [id])
+
+  @@id([productItemId, attributeValueId])
+}
+
+model ShoppingCart {
+  id         Int                @id @default(autoincrement())
+  userId     Int
+  created_at DateTime           @default(now())
+  updated_at DateTime           @default(now()) @updatedAt
+  user       User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items      ShoppingCartItem[]
+}
+
+model ShoppingCartItem {
+  id            Int          @id @default(autoincrement())
+  cartId        Int
+  productItemId Int
+  quantity      Int
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @default(now()) @updatedAt
+  cart          ShoppingCart @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productItem   ProductItem  @relation(fields: [productItemId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, productItemId], name: "unique_cart_product_item")
+}
+
+model ShopOrder {
+  id              String      @id @default(uuid())
+  userId          Int
+  shippingAddress String      @db.VarChar(100)
+  orderStatus     String      @default("pending") @db.VarChar(20)
+  orderDate       DateTime    @default(now())
+  orderTotal      Decimal     @db.Decimal(10, 2)
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @default(now()) @updatedAt
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderLines      OrderLine[]
+  payments        Payment[]
+}
+
+model OrderLine {
+  id            Int         @id @default(autoincrement())
+  orderId       String
+  productItemId Int
+  quantity      Int
+  price         Decimal     @db.Decimal(10, 2)
+  created_at    DateTime    @default(now())
+  order         ShopOrder   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productItem   ProductItem @relation(fields: [productItemId], references: [id], onDelete: Cascade)
+}
+
+model UserFavorite {
+  id            Int         @id @default(autoincrement())
+  userId        Int
+  productItemId Int
+  created_at    DateTime    @default(now())
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productItem   ProductItem @relation(fields: [productItemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productItemId])
+}
+
+enum payment_currency_enum {
+  USD
+}
+
+enum order_status_enum {
+  PAID
+  PENDING
+}
+
+enum payment_status_enum {
+  PAID
+  PENDING
+  FAILED
+}
+
+model Payment {
+  paymentId       String                @id @default(uuid())
+  orderId         String
+  stripePaymentId String                @unique @map("stripe_payment_id") @db.VarChar(255)
+  amount          Decimal               @db.Decimal(10, 2)
+  currency        payment_currency_enum
+  status          payment_status_enum   @default(PENDING)
+  paymentAt       DateTime?             @map("payment_at") @db.Timestamptz(3)
+  createdAt       DateTime?             @default(now()) @map("created_at")
+  updatedAt       DateTime?             @updatedAt @map("updated_at")
+  order           ShopOrder             @relation(fields: [orderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model StockAlert {
+  id            Int         @id @default(autoincrement())
+  productItemId Int
+  userId        Int
+  notifiedAt    DateTime?
+  created_at    DateTime    @default(now())
+  productItem   ProductItem @relation(fields: [productItemId], references: [id], onDelete: Cascade)
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

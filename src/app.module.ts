@@ -1,0 +1,33 @@
+import { Module } from '@nestjs/common';
+import { GraphqlModule } from './infrastructure/graphql/graphql.module';
+import { PersistenceModule } from './infrastructure/persistence/persistence.module';
+import { ConfigModule } from '@nestjs/config';
+import { HttpModule } from './infrastructure/http/http.module';
+import { CommonModule } from './infrastructure/common/common.module';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+@Module({
+  imports: [
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 10,
+      },
+    ]),
+    CommonModule,
+    PersistenceModule.register({
+      global: true,
+    }),
+    ConfigModule.forRoot(),
+    GraphqlModule,
+    HttpModule,
+  ],
+  controllers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
+})
+export class AppModule {}

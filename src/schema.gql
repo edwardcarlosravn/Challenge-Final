@@ -1,0 +1,259 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type CategoryType {
+  id: Int!
+  name: String!
+  slug: String!
+  description: String
+  is_active: Boolean!
+  createdAt: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type ProductItemAttributeType {
+  attributeValueId: Int!
+  value: String
+  attributeName: String
+}
+
+type ProductItemType {
+  id: ID!
+  variationId: String!
+  sku: String!
+  price: Float!
+  stock: Int!
+  attributes: [ProductItemAttributeType]
+}
+
+type VariationImageType {
+  id: ID!
+  variationId: String!
+  s3Key: String!
+  alt_text: String
+  created_at: DateTime!
+}
+
+type ProductVariationType {
+  id: ID!
+  productId: String!
+  isActive: Boolean!
+  items: [ProductItemType!]
+  images: [VariationImageType!]
+}
+
+type ProductType {
+  id: ID!
+  name: String!
+  description: String
+  categories: [CategoryType!]
+  is_active: Boolean!
+  created_at: DateTime!
+  updated_at: DateTime!
+  variations: [ProductVariationType!]
+}
+
+type PaginationMetadata {
+  totalItems: Int!
+  totalPages: Int!
+  currentPage: Int!
+  pageSize: Int!
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+}
+
+type PaginatedProductResponse {
+  data: [ProductType!]!
+  metadata: PaginationMetadata!
+}
+
+type ShoppingCartItemType {
+  id: Int!
+  cartId: Int!
+  productItemId: Int!
+  quantity: Int!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+type ShoppingCartType {
+  id: Int!
+  userId: Int!
+  items: [ShoppingCartItemType!]
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+type OrderLineType {
+  id: ID!
+  orderId: ID!
+  productItemId: Int!
+  quantity: Int!
+  price: Float!
+  created_at: DateTime!
+  productItem: ProductItemType
+}
+
+type OrderType {
+  id: ID!
+  userId: Int!
+  shippingAddress: String!
+  orderStatus: OrderStatus!
+  orderDate: DateTime!
+  orderTotal: Float!
+  orderLines: [OrderLineType!]
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+"""The status of an order"""
+enum OrderStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+type PaginatedOrderResponse {
+  data: [OrderType!]!
+  metadata: PaginationMetadata!
+}
+
+type UserFavoriteType {
+  id: Int!
+  userId: Int!
+  productItemId: Int!
+  created_at: DateTime!
+}
+
+type Query {
+  getVariationImageUrls(variationId: String!): [String!]!
+  products(pagination: PaginationInput): PaginatedProductResponse!
+  productsByCategories(filters: ProductFiltersInput!): PaginatedProductResponse!
+
+  """Get a single product by ID with all details including images"""
+  product(
+    """Product ID"""
+    id: String!
+  ): ProductType
+  categories: [CategoryType!]!
+  myCart: ShoppingCartType
+  myOrders(filters: GetOrdersFilterInput): PaginatedOrderResponse!
+  orderDetails(orderId: String!): OrderType!
+  allOrders(filters: GetOrdersFilterInput): PaginatedOrderResponse!
+  myFavorites: [UserFavoriteType!]!
+}
+
+input PaginationInput {
+  page: Int! = 1
+  pageSize: Int! = 10
+  sortBy: String
+  sortOrder: String
+}
+
+input ProductFiltersInput {
+  page: Int! = 1
+  pageSize: Int! = 10
+  sortBy: String
+  sortOrder: String
+  categoryNames: [String!]
+  isActive: Boolean
+}
+
+input GetOrdersFilterInput {
+  page: Int! = 1
+  pageSize: Int! = 10
+  sortBy: String
+  sortOrder: String
+  status: OrderStatus
+  startDate: String
+  endDate: String
+}
+
+type Mutation {
+  generateVariationImageUploadUrl(variationId: String!, fileName: String!, contentType: String!): String!
+  updateProduct(input: UpdateProductInput!): ProductType!
+  createProductWithVariations(input: CreateProductWithVariationsInput!): ProductType!
+  createCategory(input: CreateCategoryInput!): CategoryType!
+  createVariation(input: CreateVariationInput!): ProductVariationType!
+  addToCart(input: AddToCartInput!): ShoppingCartItemType!
+  updateCartItemQuantity(input: UpdateCartItemInput!): ShoppingCartItemType!
+  removeFromCart(input: RemoveFromCartInput!): Boolean!
+  clearCart: Boolean!
+  createOrderFromCart(input: CreateOrderFromCartInput!): OrderType!
+  updateOrderStatus(input: UpdateOrderStatusInput!): OrderType!
+  deleteProductItem(input: DeleteProductItemInput!): Boolean!
+  addFavorite(input: AddFavoriteInput!): UserFavoriteType!
+}
+
+input UpdateProductInput {
+  id: String!
+  name: String
+  description: String
+  isActive: Boolean
+}
+
+input CreateProductWithVariationsInput {
+  name: String!
+  description: String
+  categoryNames: [String!]
+  variations: [CreateVariationInput!]
+}
+
+input CreateVariationInput {
+  productId: String!
+  items: [CreateVariationItemInput!]
+}
+
+input CreateVariationItemInput {
+  sku: String!
+  price: Float!
+  stock: Int = 0
+  attributes: [CreateItemAttributeInput!]
+}
+
+input CreateItemAttributeInput {
+  attributeValueId: Int!
+}
+
+input CreateCategoryInput {
+  name: String!
+  slug: String
+  description: String
+}
+
+input AddToCartInput {
+  productItemId: Int!
+  quantity: Int!
+}
+
+input UpdateCartItemInput {
+  cartItemId: Int!
+  quantity: Int!
+}
+
+input RemoveFromCartInput {
+  cartItemId: Int!
+}
+
+input CreateOrderFromCartInput {
+  shippingAddress: String!
+}
+
+input UpdateOrderStatusInput {
+  orderId: String!
+  newStatus: OrderStatus!
+}
+
+input DeleteProductItemInput {
+  id: Int!
+}
+
+input AddFavoriteInput {
+  productItemId: Int!
+}
