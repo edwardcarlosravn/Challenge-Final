@@ -1,5 +1,5 @@
-// src/infrastructure/graphql/resolvers/shopping-cart/shopping-cart.resolver.ts
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { SkipThrottle } from '@nestjs/throttler';
 import { UseGuards } from '@nestjs/common';
 import { GqlJwtAuthGuard } from '../../guards/gql-jwt-auth.guard';
 import { CurrentUser } from '../../decorators/current-user.decorator';
@@ -24,7 +24,7 @@ export class ShoppingCartResolver {
     private readonly updateCartItemQuantityUseCase: UpdateCartItemQuantityUseCase,
     private readonly clearCartUseCase: ClearCartUseCase,
   ) {}
-
+  @SkipThrottle()
   @Query(() => ShoppingCartType, { nullable: true })
   @UseGuards(GqlJwtAuthGuard)
   async myCart(
@@ -38,7 +38,7 @@ export class ShoppingCartResolver {
 
     return ShoppingCartType.fromDomainToEntity(cart);
   }
-
+  @SkipThrottle()
   @Mutation(() => ShoppingCartItemType)
   @UseGuards(GqlJwtAuthGuard)
   async addToCart(
@@ -53,7 +53,7 @@ export class ShoppingCartResolver {
 
     return ShoppingCartItemType.fromDomainToEntity(cartItem);
   }
-
+  @SkipThrottle()
   @Mutation(() => ShoppingCartItemType)
   @UseGuards(GqlJwtAuthGuard)
   async updateCartItemQuantity(
@@ -68,7 +68,7 @@ export class ShoppingCartResolver {
 
     return ShoppingCartItemType.fromDomainToEntity(cartItem);
   }
-
+  @SkipThrottle()
   @Mutation(() => Boolean)
   @UseGuards(GqlJwtAuthGuard)
   async removeFromCart(
@@ -82,7 +82,7 @@ export class ShoppingCartResolver {
 
     return true;
   }
-
+  @SkipThrottle()
   @Mutation(() => Boolean)
   @UseGuards(GqlJwtAuthGuard)
   async clearCart(@CurrentUser() user: CurrentUserType): Promise<boolean> {

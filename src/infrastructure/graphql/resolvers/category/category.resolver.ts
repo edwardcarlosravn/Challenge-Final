@@ -3,14 +3,14 @@ import { GetCategoriesUseCase } from 'src/application/use-cases/category/get-cat
 import { CreateCategoryUseCase } from 'src/application/use-cases/category/create-category.use-case';
 import { CategoryType } from '../../entities/category.entity';
 import { CreateCategoryInput } from '../../dto/category/create-category.input';
-
+import { SkipThrottle } from '@nestjs/throttler';
 @Resolver(() => CategoryType)
 export class CategoryResolver {
   constructor(
     private readonly getCategoriesUseCase: GetCategoriesUseCase,
     private readonly createCategoryUseCase: CreateCategoryUseCase,
   ) {}
-
+  @SkipThrottle()
   @Query(() => [CategoryType], { name: 'categories' })
   async getCategories(): Promise<CategoryType[]> {
     const categories = await this.getCategoriesUseCase.execute();
@@ -23,7 +23,7 @@ export class CategoryResolver {
       createdAt: category.createdAt,
     }));
   }
-
+  @SkipThrottle()
   @Mutation(() => CategoryType)
   async createCategory(
     @Args('input') input: CreateCategoryInput,

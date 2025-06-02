@@ -1,4 +1,5 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { SkipThrottle } from '@nestjs/throttler';
 import { UseGuards } from '@nestjs/common';
 import { GqlJwtAuthGuard } from '../../guards/gql-jwt-auth.guard';
 import { GqlRolesGuard } from '../../guards/gql-roles.guard';
@@ -24,7 +25,7 @@ export class OrderResolver {
     private readonly getOrderDetailsUseCase: GetOrderDetailsUseCase,
     private readonly updateOrderStatusUseCase: UpdateOrderStatusUseCase,
   ) {}
-
+  @SkipThrottle()
   @Query(() => PaginatedOrderResponse, { name: 'myOrders' })
   @UseGuards(GqlJwtAuthGuard)
   async getMyOrders(
@@ -52,7 +53,7 @@ export class OrderResolver {
       },
     };
   }
-
+  @SkipThrottle()
   @Query(() => OrderType, { name: 'orderDetails' })
   @UseGuards(GqlJwtAuthGuard)
   async getOrderDetails(
@@ -66,7 +67,7 @@ export class OrderResolver {
 
     return OrderType.fromDomainToEntity(order);
   }
-
+  @SkipThrottle()
   @Query(() => PaginatedOrderResponse, { name: 'allOrders' })
   @UseGuards(GqlJwtAuthGuard, GqlRolesGuard)
   @Roles(Role.ADMIN)
@@ -94,7 +95,7 @@ export class OrderResolver {
       },
     };
   }
-
+  @SkipThrottle()
   @Mutation(() => OrderType, { name: 'createOrderFromCart' })
   @UseGuards(GqlJwtAuthGuard)
   async createOrderFromCart(
@@ -108,7 +109,7 @@ export class OrderResolver {
 
     return OrderType.fromDomainToEntity(order);
   }
-
+  @SkipThrottle()
   @Mutation(() => OrderType, { name: 'updateOrderStatus' })
   @UseGuards(GqlJwtAuthGuard, GqlRolesGuard)
   @Roles(Role.ADMIN)

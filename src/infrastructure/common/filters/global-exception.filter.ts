@@ -1,4 +1,3 @@
-// src/infrastructure/common/filters/global-exception.filter.ts
 import {
   ExceptionFilter,
   Catch,
@@ -17,6 +16,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   constructor() {}
 
   catch(exception: unknown, host: ArgumentsHost): void {
+    const contextType = host.getType();
+
+    if (contextType.toString() === 'graphql') {
+      throw exception;
+    }
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();

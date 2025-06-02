@@ -30,23 +30,23 @@ import { APP_FILTER } from '@nestjs/core';
         req: Request;
         res: Response;
       }): { req: Request; res: Response } => ({ req, res }),
-      formatError: (error) => {
-        const originalError = error.extensions?.originalError;
-        if (
-          !originalError ||
-          typeof originalError !== 'object' ||
-          typeof (originalError as Error).message !== 'string'
-        ) {
-          return {
-            message: error.message,
-            code: error.extensions?.code,
-          };
-        }
-        return {
-          message: (originalError as Error).message,
-          code: error.extensions?.code,
-        };
-      },
+      // formatError: (error) => {
+      //   const originalError = error.extensions?.originalError;
+      //   if (
+      //     !originalError ||
+      //     typeof originalError !== 'object' ||
+      //     typeof (originalError as Error).message !== 'string'
+      //   ) {
+      //     return {
+      //       message: error.message,
+      //       code: error.extensions?.code,
+      //     };
+      //   }
+      //   return {
+      //     message: (originalError as Error).message,
+      //     code: error.extensions?.code,
+      //   };
+      // },
     }),
     CategoryModule,
     VariationModule,

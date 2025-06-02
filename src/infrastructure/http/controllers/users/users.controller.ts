@@ -23,6 +23,8 @@ import { UpdateUserRoleDto } from '../../dto/user/role-user.request';
 import { OTPType, User } from '@prisma/client';
 import { RequestTokenDto } from '../../dto/user/requestToken.dto';
 import { EmailService } from '../../services/mails.service';
+import { SkipThrottle } from '@nestjs/throttler';
+
 @Roles(Role.CLIENT)
 @Controller('users')
 export class UsersController {
@@ -30,16 +32,19 @@ export class UsersController {
     private readonly usersService: UsersService,
     private readonly emailService: EmailService,
   ) {}
+  @SkipThrottle()
   @Post()
   createUser(@Body() request: CreateUserRequest) {
     return this.usersService.createUser(request);
   }
+  @SkipThrottle()
   @Get('me')
   @UseGuards(JwtAuthGuard)
   getMe(@CurrentUser() user: TokenPayload) {
     return user;
   }
   // @SetMetadata('role', [Role.ADMIN])
+  @SkipThrottle()
   @Roles(Role.ADMIN, Role.EDITOR)
   @UseGuards(RolesGuard)
   @UseGuards(JwtAuthGuard)
@@ -47,6 +52,7 @@ export class UsersController {
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);
   }
+  @SkipThrottle()
   @Patch(':user_id/role')
   @Roles(Role.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -63,6 +69,7 @@ export class UsersController {
       updateUserRoleDto.newRole,
     );
   }
+  @SkipThrottle()
   @Post('request-otp')
   async requestOTP(@Body() dto: RequestTokenDto) {
     const { email } = dto;

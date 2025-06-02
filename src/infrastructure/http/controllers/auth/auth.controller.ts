@@ -18,17 +18,20 @@ import { ForgotPasswordDto } from '../../dto/auth/forgot-password.dto';
 import { EmailService } from '../../services/mails.service';
 import { Throttle } from '@nestjs/throttler';
 import { CreateUserRequest } from '../../dto/user/create-user.request';
+import { SkipThrottle } from '@nestjs/throttler';
 @Controller('auth')
 export class AuthController {
   constructor(
     private authService: AuthService,
     private readonly emailService: EmailService,
   ) {}
+  @SkipThrottle()
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
   async signUp(@Body() createUserRequest: CreateUserRequest) {
     return this.authService.signUp(createUserRequest);
   }
+  @SkipThrottle()
   @HttpCode(HttpStatus.OK)
   @UseGuards(LocalAuthGuard)
   @Post('login')
@@ -36,11 +39,13 @@ export class AuthController {
     console.log(opt);
     return this.authService.login(user, opt.otp);
   }
+  @SkipThrottle()
   @UseGuards(RefreshAuthGuard)
   @Post('refresh')
   refreshToken(@CurrentUser() user: User) {
     return this.authService.refreshToken(user);
   }
+  @SkipThrottle()
   @UseGuards(JwtAuthGuard)
   @Post('signout')
   signout(@CurrentUser() user: TokenPayload) {
@@ -54,6 +59,7 @@ export class AuthController {
   ) {
     return this.authService.resetPassword(token, password);
   }
+  @SkipThrottle()
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
   async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {

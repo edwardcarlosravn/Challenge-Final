@@ -6,13 +6,14 @@ import { DeleteProductItemUseCase } from 'src/application/use-cases/variation/de
 import { DeleteProductItemInput } from '../../dto/variation/delete-product-item.input';
 import { Roles } from 'src/infrastructure/http/decorators/auth/roles.decorators';
 import { Role } from 'src/infrastructure/http/enums/auth/role.enums';
+import { SkipThrottle } from '@nestjs/throttler';
 
 @Resolver()
 export class ProductItemResolver {
   constructor(
     private readonly deleteProductItemUseCase: DeleteProductItemUseCase,
   ) {}
-
+  @SkipThrottle()
   @Roles(Role.ADMIN)
   @UseGuards(GqlJwtAuthGuard, GqlRolesGuard)
   @Mutation(() => Boolean)

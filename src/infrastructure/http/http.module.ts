@@ -5,7 +5,6 @@ import { EmailModule } from './controllers/mails/mails.module';
 import { OtpModule } from './controllers/opt/opt.module';
 import { StripeModule } from './controllers/payment/stripe/stripe.module';
 import { PaymentModule } from './controllers/payment/payment.module';
-
 @Module({
   imports: [
     AuthModule,

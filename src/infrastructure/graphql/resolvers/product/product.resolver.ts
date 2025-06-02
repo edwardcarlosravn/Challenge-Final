@@ -49,7 +49,7 @@ export class ProductResolver {
       metadata: result.metadata,
     };
   }
-
+  @SkipThrottle()
   @Query(() => PaginatedProductResponse, { name: 'productsByCategories' })
   async getProductsByCategories(
     @Args('filters') filters: ProductFiltersInput,
@@ -71,6 +71,7 @@ export class ProductResolver {
       metadata: result.metadata,
     };
   }
+  @SkipThrottle()
   @Roles(Role.ADMIN)
   @UseGuards(GqlJwtAuthGuard, GqlRolesGuard)
   @Mutation(() => ProductType)
@@ -85,6 +86,7 @@ export class ProductResolver {
 
     return ProductType.fromDomainToEntity(updatedProduct);
   }
+  @SkipThrottle()
   @Roles(Role.ADMIN)
   @UseGuards(GqlJwtAuthGuard, GqlRolesGuard)
   @Mutation(() => ProductType)
@@ -103,6 +105,7 @@ export class ProductResolver {
 
     return ProductType.fromDomainToEntity(result);
   }
+  @SkipThrottle()
   @ResolveField(() => [CategoryType], { nullable: true })
   async categories(@Parent() product: ProductType): Promise<CategoryType[]> {
     const categories = await this.categoryByProductLoader.load(product.id);
@@ -115,6 +118,7 @@ export class ProductResolver {
       createdAt: category.createdAt,
     }));
   }
+  @SkipThrottle()
   @Query(() => ProductType, {
     nullable: true,
     name: 'product',
@@ -124,6 +128,7 @@ export class ProductResolver {
     @Args('id', { description: 'Product ID' }) id: string,
   ): Promise<ProductType | null> {
     try {
+      console.log('🚀 RESOLVER CALLED with ID:', id);
       const product = await this.getProductByIdUseCase.execute(id);
       return ProductType.fromDomainToEntity(product);
     } catch (error) {

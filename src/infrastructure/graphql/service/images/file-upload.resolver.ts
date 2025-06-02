@@ -2,7 +2,7 @@ import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { Inject } from '@nestjs/common';
 import { FileUploadService } from './file-upload.service';
 import { VariationImageRepository } from 'src/application/contracts/persistence/variation-image.repository';
-
+import { SkipThrottle } from '@nestjs/throttler';
 @Resolver()
 export class FileUploadResolver {
   constructor(
@@ -10,7 +10,7 @@ export class FileUploadResolver {
     @Inject('VariationImageRepository')
     private readonly variationImageRepository: VariationImageRepository,
   ) {}
-
+  @SkipThrottle()
   @Mutation(() => String)
   async generateVariationImageUploadUrl(
     @Args('variationId') variationId: string,
@@ -28,7 +28,7 @@ export class FileUploadResolver {
 
     return presignedUrl;
   }
-
+  @SkipThrottle()
   @Query(() => [String])
   async getVariationImageUrls(@Args('variationId') variationId: string) {
     const images =

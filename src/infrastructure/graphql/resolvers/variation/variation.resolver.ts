@@ -2,13 +2,13 @@ import { Resolver, Mutation, Args } from '@nestjs/graphql';
 import { ProductVariationType } from '../../entities/variation.entity';
 import { CreateVariationInput } from '../../dto/variation/create-product-variation.input';
 import { CreateVariationUseCase } from 'src/application/use-cases/variation/create-variation.user-case';
-
+import { SkipThrottle } from '@nestjs/throttler';
 @Resolver(() => ProductVariationType)
 export class VariationResolver {
   constructor(
     private readonly createVariationUseCase: CreateVariationUseCase,
   ) {}
-
+  @SkipThrottle()
   @Mutation(() => ProductVariationType)
   async createVariation(
     @Args('input') input: CreateVariationInput,
