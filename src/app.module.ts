@@ -6,8 +6,19 @@ import { HttpModule } from './infrastructure/http/http.module';
 import { CommonModule } from './infrastructure/common/common.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { BullModule } from '@nestjs/bull';
+import { RedisModule } from './redis/redis.module';
 @Module({
   imports: [
+    BullModule.forRoot({
+      redis: {
+        host: 'localhost',
+        port: 6379,
+      },
+    }),
+    BullModule.registerQueue({
+      name: 'stock-notifications',
+    }),
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
@@ -21,6 +32,7 @@ import { APP_GUARD } from '@nestjs/core';
     ConfigModule.forRoot(),
     GraphqlModule,
     HttpModule,
+    RedisModule,
   ],
   controllers: [],
   providers: [

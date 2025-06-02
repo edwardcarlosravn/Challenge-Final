@@ -4,6 +4,7 @@ import Stripe from 'stripe';
 import { PaymentRepository } from 'src/application/contracts/persistence/payment.interface';
 import { StripeService } from 'src/infrastructure/http/services/stripe.service';
 import { OrderRepository } from 'src/application/contracts/persistence/order-repository.interface';
+import { RedisStockAlert } from 'src/redis/redis-stock-alert.service';
 
 interface IProcessPaymentUseCaseProps {
   paymentId: string;
@@ -11,6 +12,7 @@ interface IProcessPaymentUseCaseProps {
   signature: string;
   paymentAt: number;
 }
+
 @Injectable()
 export class ProcessPaymentUseCase {
   constructor(
@@ -19,6 +21,7 @@ export class ProcessPaymentUseCase {
     private readonly stripeService: StripeService,
     @Inject('OrderRepository')
     private readonly orderRepository: OrderRepository,
+    private readonly redisStockAlert: RedisStockAlert,
   ) {}
 
   async execute({
@@ -60,10 +63,15 @@ export class ProcessPaymentUseCase {
       case 'payment_intent.succeeded':
         payment.status = 'PAID';
         payment.paymentAt = new Date(paymentAt * 1000);
+
+        // ✅ AQUÍ: Verificar stock bajo después de pago exitoso
+        await this.checkLowStockForOrder(order);
         break;
+
       case 'payment_intent.payment_failed':
         payment.status = 'FAILED';
         break;
+
       default:
         throw new BadRequestException(`Unhandled event type: ${event.type}`);
     }
@@ -74,5 +82,45 @@ export class ProcessPaymentUseCase {
     );
 
     return updatedPayment;
+  }
+
+  // ✅ Método privado para verificar stock bajo
+  private async checkLowStockForOrder(order: any): Promise<void> {
+    try {
+      console.log(
+        '🔍 Verificando stock bajo después de pago exitoso para orden:',
+        order.id,
+      );
+
+      // Obtener todos los ProductItems de la orden
+      const productItemIds =
+        order.orderLines?.map((line: any) => line.productItemId) || [];
+
+      console.log('📦 ProductItems a verificar:', productItemIds);
+
+      // Verificar stock bajo para cada producto de la orden
+      const stockCheckPromises = productItemIds.map(
+        async (productItemId: number) => {
+          try {
+            await this.redisStockAlert.checkStockAndNotify(productItemId);
+          } catch (error) {
+            console.error(
+              `❌ Error verificando stock para ProductItem ${productItemId}:`,
+              error.message,
+            );
+            // No lanzar error para que no afecte el procesamiento del pago
+          }
+        },
+      );
+
+      await Promise.allSettled(stockCheckPromises);
+      console.log('✅ Verificación de stock bajo completada');
+    } catch (error) {
+      console.error(
+        '❌ Error general en verificación de stock bajo:',
+        error.message,
+      );
+      // No lanzar error para que no afecte el procesamiento del pago
+    }
   }
 }

@@ -10,7 +10,6 @@ export class GetProductByIdUseCase {
   ) {}
 
   async execute(id: string): Promise<Product> {
-    console.log('HOLAAA');
     if (!id || id.trim().length === 0) {
       throw new NotFoundException('Product ID is required');
     }

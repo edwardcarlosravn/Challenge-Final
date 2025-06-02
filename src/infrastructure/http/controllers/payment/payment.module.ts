@@ -4,9 +4,9 @@ import { ProcessPaymentUseCase } from 'src/application/use-cases/payment/process
 import { PaymentController } from './stripe/stripe.controller';
 import { StripeModule } from './stripe/stripe.module';
 import { PrismaModule } from 'src/infrastructure/persistence/prisma/prisma.module';
-
+import { RedisModule } from 'src/redis/redis.module';
 @Module({
-  imports: [StripeModule, PrismaModule],
+  imports: [StripeModule, PrismaModule, RedisModule],
   providers: [CreatePaymentUseCase, ProcessPaymentUseCase],
   controllers: [PaymentController],
 })
