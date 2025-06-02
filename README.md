@@ -1,34 +1,96 @@
+# T-Shirts Store API
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+<p align="center">REST API for a t-shirts store developed with NestJS, GraphQL, Prisma and PostgreSQL</p>
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
+<p align="center">
+  <a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
+  <a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
+  <a href="https://nodejs.org" target="_blank"><img src="https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg" alt="Node Version" /></a>
 </p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Complete REST API for a t-shirts store that includes user management, products, categories, shopping cart, orders, favorites, Stripe payments and email notifications. The project implements JWT authentication, role-based authorization, OTP validation and multiple design patterns.
+
+## Technologies Used
+
+- **Backend**: NestJS, TypeScript
+- **Database**: PostgreSQL with Prisma ORM
+- **GraphQL**: Apollo Server
+- **Authentication**: JWT, Passport.js
+- **Payments**: Stripe Integration
+- **Email**: Nodemailer
+- **Validation**: class-validator, class-transformer
+- **Documentation**: Auto-generated with GraphQL Playground
+
+## Architecture
+
+- **Clean Architecture** with layer separation
+- **CQRS Pattern** for complex operations
+- **Repository Pattern** for data access
+- **Use Cases** for business logic
+- **DTOs** for validation and data transformation
+
+## Installation and Configuration
+
+### Prerequisites
+
+- Node.js >= 18.0.0
+- PostgreSQL >= 13
+- npm or yarn
+
+### Environment Variables
+
+Create a `.env` file with the following variables:
+
+```bash
+# Database
+DATABASE_URL="postgresql://username:password@localhost:5432/tshirts_store"
+
+# JWT Configuration
+JWT_SECRET="your-jwt-secret-key"
+JWT_EXPIRATION="15m"
+REFRESH_JWT_SECRET="your-refresh-jwt-secret"
+REFRESH_JWT_EXPIRATION="7d"
+JWT_RESET_SECRET="your-reset-jwt-secret"
+
+# Email Configuration
+EMAIL_HOST="smtp.gmail.com"
+EMAIL_PORT=587
+EMAIL_USER="your-email@gmail.com"
+EMAIL_PASS="your-app-password"
+
+# Stripe Configuration
+STRIPE_SECRET_KEY="sk_test_your_stripe_secret_key"
+STRIPE_WEBHOOK_SECRET="whsec_your_webhook_secret"
+
+# Application
+PORT=3000
+CORS_ORIGINS="http://localhost:3000,http://localhost:3001"
+RESET_PASSWORD_URL="http://localhost:3000/reset-password"
+```
 
 ## Project setup
 
 ```bash
 $ npm install
+```
+
+## Database setup
+
+```bash
+# Generate Prisma client
+$ npx prisma generate
+
+# Run database migrations
+$ npx prisma migrate deploy
+
+# Seed the database (optional)
+$ npx prisma db seed
 ```
 
 ## Compile and run the project
@@ -57,42 +119,71 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
-## Deployment
+---
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+## 📚 API Documentation
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+This project provides two types of APIs:
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+### 🌐 REST API
+Complete documentation of REST endpoints for authentication, user management, payments, and email services.
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+**[📖 View REST API Documentation](./documents/rest.README.md)**
 
-## Resources
+### 🚀 GraphQL API
+Complete documentation of GraphQL queries and mutations for products, orders, shopping cart, and favorites.
 
-Check out a few resources that may come in handy when working with NestJS:
+**[📖 View GraphQL API Documentation](./documents/graphql.README.md)**
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+---
 
-## Support
+## 🛡️ Security
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### JWT Authentication
+- **Access Token**: Valid for 15 minutes
+- **Refresh Token**: Valid for 7 days
+- **Reset Token**: Valid for 15 minutes
 
-## Stay in touch
+### Rate Limiting
+- **General authentication**: 10 requests/minute
+- **Reset password**: 1 request/second, 3 requests/5 minutes
+- **Forgot password**: 3 requests/5 minutes
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### User Roles
+- **CLIENT**: Normal users, can make purchases
+- **EDITOR**: Can manage products and categories
+- **ADMIN**: Full system access
 
-## License
+### OTP Validation
+- 6-digit codes
+- Valid for 5 minutes
+- Hashed with bcrypt
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+---
+
+## 🗃️ Database
+
+### Main Models
+- **User**: System users
+- **Product**: Products (t-shirts)
+- **Category**: Product categories
+- **Order**: Purchase orders
+- **Payment**: Processed payments
+- **ShoppingCart**: Shopping cart
+- **Favorite**: Favorite products
+- **OTP**: Verification codes
+
+---
+
+## 👨‍💻 Author
+
+**Edward Huayllasco Carlos**
+
+---
+
+## 🙏 Acknowledgments
+
+- [NestJS](https://nestjs.com/) - Node.js Framework
+- [Prisma](https://prisma.io/) - Modern ORM for TypeScript
+- [Stripe](https://stripe.com/) - Payment Platform
+- [Apollo GraphQL](https://www.apollographql.com/) - GraphQL Platform
