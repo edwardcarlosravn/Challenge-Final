@@ -1,9 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import { ConfigService } from '@nestjs/config';
 import { sendEmailDto } from '../dto/mails/email.dto';
 import { OTPService } from './opt.service';
 import { OTPType, User } from '@prisma/client';
+
+interface EmailData {
+  recipients: string[];
+  subject: string;
+  html: string;
+}
 
 @Injectable()
 export class EmailService {
@@ -37,59 +43,56 @@ export class EmailService {
       subject: subject,
       html: html,
     };
+
     try {
       await transport.sendMail(options);
-      console.log('Email sent successfully');
-    } catch (error) {
-      console.log('Error sending mail: ', error);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new InternalServerErrorException('Failed to send email');
+      }
     }
   }
+
   async sendVerificationEmail(user: User, type: OTPType): Promise<void> {
-    const token = await this.otpService.generateToken(user, type);
-    const emailStrategy = this.getEmailStrategy(type);
-    const emailDto: EmailData = emailStrategy.getEmailData(user.email, token);
-
-    await this.sendEmail(emailDto);
-  }
-  private getEmailStrategy(type: OTPType): EmailStrategy {
-    const strategies = {
-      [OTPType.otp]: new VerificationEmailStrategy(),
-      [OTPType.reset_password]: new ResetPasswordEmailStrategy(
-        this.configService,
-      ),
-    };
-
-    const strategy = strategies[type];
-    if (!strategy) {
-      throw new Error('Invalid email strategy type');
+    try {
+      const token = await this.otpService.generateToken(user, type);
+      const emailDto = this.buildEmailData(user.email, token, type);
+      await this.sendEmail(emailDto);
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new InternalServerErrorException(
+          `Failed to send ${type.replace('_', ' ')} email`,
+        );
+      }
     }
-    return strategy;
   }
-}
-interface EmailData {
-  recipients: string[];
-  subject: string;
-  html: string;
-}
 
-interface EmailStrategy {
-  getEmailData(email: string, token: string): EmailData;
-}
+  private buildEmailData(
+    email: string,
+    token: string,
+    type: OTPType,
+  ): EmailData {
+    switch (type) {
+      case OTPType.otp:
+        return this.buildOTPEmail(email, token);
 
-class VerificationEmailStrategy implements EmailStrategy {
-  getEmailData(email: string, token: string) {
+      case OTPType.reset_password:
+        return this.buildResetPasswordEmail(email, token);
+
+      default:
+        throw new Error(`Unsupported email type: ${String(type)}`);
+    }
+  }
+
+  private buildOTPEmail(email: string, token: string): EmailData {
     return {
       recipients: [email],
       subject: 'OTP for verification',
       html: `Your otp code is: <strong>${token}</strong>.<br />Provide this otp to verify your account`,
     };
   }
-}
 
-class ResetPasswordEmailStrategy implements EmailStrategy {
-  constructor(private readonly configService: ConfigService) {}
-
-  getEmailData(email: string, token: string) {
+  private buildResetPasswordEmail(email: string, token: string): EmailData {
     const resetLink = `${this.configService.get('RESET_PASSWORD_URL')}?token=${token}`;
     return {
       recipients: [email],

@@ -3,12 +3,12 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
-import { GlobalExceptionFilter } from './infrastructure/common/filters/global-exception.filter';
+// import { GlobalExceptionFilter } from './infrastructure/common/filters/global-exception.filter';
 import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.useGlobalFilters(app.get(GlobalExceptionFilter));
+  // app.useGlobalFilters(app.get(GlobalExceptionFilter));
   app.use(
     helmet({
       crossOriginEmbedderPolicy: false,

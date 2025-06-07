@@ -1,5 +1,5 @@
-// src/infrastructure/persistence/prisma/mappers/product.mapper.ts
 import { Product } from 'src/domain/product';
+import { Category } from 'src/domain/category';
 import {
   Product as PrismaProduct,
   ProductCategory as PrismaProductCategory,
@@ -11,7 +11,7 @@ import {
   Prisma,
 } from '@prisma/client';
 import { VariationMapper } from './variation.mapper';
-
+import { CategoryMapper } from './category.mapper';
 type PrismaVariationWithDetails = PrismaProductVariation & {
   items?: (PrismaProductItem & {
     attributes?: (PrismaProductItemAttribute & {
@@ -32,12 +32,14 @@ export class ProductMapper {
     const variations = raw.variations?.map((variation) =>
       VariationMapper.toDomain(variation),
     );
-
+    const categories = raw.categories?.map((category) =>
+      CategoryMapper.toDomain(category),
+    );
     return new Product(
       raw.id,
       raw.name,
       raw.description,
-      raw.categories?.map((cat) => cat.id) || [],
+      categories,
       raw.is_active,
       raw.created_at,
       raw.updated_at,

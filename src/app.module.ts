@@ -5,9 +5,10 @@ import { ConfigModule } from '@nestjs/config';
 import { HttpModule } from './infrastructure/http/http.module';
 import { CommonModule } from './infrastructure/common/common.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_FILTER } from '@nestjs/core';
 import { BullModule } from '@nestjs/bull';
 import { RedisModule } from './redis/redis.module';
+import { GlobalExceptionFilter } from './infrastructure/common/filters/global-exception.filter';
 @Module({
   imports: [
     BullModule.forRoot({
@@ -39,6 +40,10 @@ import { RedisModule } from './redis/redis.module';
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: GlobalExceptionFilter,
     },
   ],
 })

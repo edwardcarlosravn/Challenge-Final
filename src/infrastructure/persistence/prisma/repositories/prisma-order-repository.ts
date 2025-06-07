@@ -41,21 +41,6 @@ export class PrismaOrderRepository implements OrderRepository {
     });
   }
 
-  private async recalculateOrderTotal(
-    tx: Prisma.TransactionClient,
-    orderId: string,
-  ): Promise<void> {
-    const lines = await tx.orderLine.findMany({ where: { orderId } });
-    const total = lines.reduce(
-      (sum, line) => sum + Number(line.price) * line.quantity,
-      0,
-    );
-    await tx.shopOrder.update({
-      where: { id: orderId },
-      data: { orderTotal: new Prisma.Decimal(total), updated_at: new Date() },
-    });
-  }
-
   private async getUserCart(tx: Prisma.TransactionClient, userId: number) {
     return tx.shoppingCart.findFirst({
       where: { userId },

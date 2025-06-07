@@ -1,5 +1,10 @@
-// filepath: /Users/edward/Documents/FinalChallenge/t-shirts-store/src/infrastructure/graphql/guards/gql-roles.guard.ts
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { Role } from '../../http/enums/auth/role.enums';
@@ -15,7 +20,7 @@ export class GqlRolesGuard implements CanActivate {
       context.getClass(),
     ]);
 
-    if (!requiredRoles) {
+    if (!requiredRoles || requiredRoles.length === 0) {
       return true;
     }
 
@@ -24,9 +29,15 @@ export class GqlRolesGuard implements CanActivate {
     const user = gqlContext.req?.user;
 
     if (!user) {
-      return false;
+      throw new BadRequestException('User not found');
     }
 
-    return requiredRoles.some((role) => user.role === role);
+    const hasValidRole = requiredRoles.some((role) => user.role === role);
+
+    if (!hasValidRole) {
+      throw new ForbiddenException('User does not have the required role');
+    }
+
+    return true;
   }
 }

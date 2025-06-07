@@ -3,7 +3,6 @@ import { ProductMapper } from '../mappers/product.mapper';
 import { ProductRepository } from 'src/application/contracts/persistence/product-repository.interface';
 import { Product } from 'src/domain/product';
 import { CreateProductWithVariationsDto } from 'src/application/dto/product/create-product.dto';
-import { ProductWithCategories } from 'src/application/contracts/persistence/interfaces/product-with-categories.interface';
 import { CategoryMapper } from '../mappers/category.mapper';
 import { PrismaService } from '../prisma.service';
 import { ErrorHandlerService } from 'src/infrastructure/common/error-handler.service';
@@ -272,7 +271,7 @@ export class PrismaProductRepository implements ProductRepository {
   }
   async getProductsWithCategoriesByIds(
     productIds: string[],
-  ): Promise<ProductWithCategories[]> {
+  ): Promise<Product[]> {
     try {
       const products = await this.prisma.product.findMany({
         where: {

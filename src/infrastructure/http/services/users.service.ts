@@ -67,9 +67,6 @@ export class UsersService {
       where: filter,
     });
   }
-  remove(id: number) {
-    return `This action removes a ${id} users`;
-  }
   async updateUserRole(
     adminUser: User,
     targetUserId: number,

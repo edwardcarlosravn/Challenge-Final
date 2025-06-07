@@ -27,6 +27,7 @@ export class FileUploadService {
     fileName: string,
     contentType: string,
   ): Promise<{ presignedUrl: string; s3Key: string }> {
+    this.validateImageFile(fileName, contentType);
     const s3Key = `variations/${variationId}/${Date.now()}-${fileName}`;
 
     const command = new PutObjectCommand({
@@ -55,5 +56,37 @@ export class FileUploadService {
     return getSignedUrl(this.s3Client, command, {
       expiresIn: 300,
     });
+  }
+  private validateImageFile(fileName: string, contentType: string): void {
+    const validImageTypes = [
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'image/bmp',
+      'image/svg+xml',
+    ];
+
+    if (!validImageTypes.includes(contentType.toLowerCase())) {
+      throw new Error('Only image files are allowed');
+    }
+
+    const validExtensions = [
+      '.jpg',
+      '.jpeg',
+      '.png',
+      '.gif',
+      '.webp',
+      '.bmp',
+      '.svg',
+    ];
+    const fileExtension = fileName
+      .toLowerCase()
+      .substring(fileName.lastIndexOf('.'));
+
+    if (!validExtensions.includes(fileExtension)) {
+      throw new Error('Only image files are allowed');
+    }
   }
 }

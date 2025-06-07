@@ -1,16 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CategoryMapper } from '../mappers/category.mapper';
 import { PrismaService } from '../prisma.service';
 import { CategoryRepository } from 'src/application/contracts/persistence/category-repository.interface';
 import { Category } from 'src/domain/category';
-import { ErrorHandlerService } from 'src/infrastructure/common/error-handler.service';
 
 @Injectable()
 export class PrismaCategoryRepository implements CategoryRepository {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly errorHandler: ErrorHandlerService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async findAll(): Promise<Category[]> {
     try {
@@ -20,7 +20,9 @@ export class PrismaCategoryRepository implements CategoryRepository {
       });
       return categories.map((category) => CategoryMapper.toDomain(category));
     } catch (error) {
-      this.errorHandler.handleDatabaseError(error, 'findAll');
+      if (error instanceof Error)
+        throw new InternalServerErrorException('Failed to retrieve categories');
+      return [];
     }
   }
 
@@ -39,7 +41,9 @@ export class PrismaCategoryRepository implements CategoryRepository {
       });
       return CategoryMapper.toDomain(created);
     } catch (error) {
-      this.errorHandler.handleDatabaseError(error, 'create');
+      if (error instanceof Error)
+        throw new InternalServerErrorException('Failed to create category');
+      throw error;
     }
   }
 
@@ -50,7 +54,11 @@ export class PrismaCategoryRepository implements CategoryRepository {
       });
       return count > 0;
     } catch (error) {
-      this.errorHandler.handleDatabaseError(error, 'existsByName');
+      if (error instanceof Error)
+        throw new InternalServerErrorException(
+          'Failed to check category existence',
+        );
+      return false;
     }
   }
 
@@ -68,7 +76,10 @@ export class PrismaCategoryRepository implements CategoryRepository {
       });
       return categories.map((category) => category.id);
     } catch (error) {
-      this.errorHandler.handleDatabaseError(error, 'validateAndGetIds');
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to validate categories');
     }
   }
 }

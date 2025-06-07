@@ -45,14 +45,6 @@ export class UsersController {
   }
   // @SetMetadata('role', [Role.ADMIN])
   @SkipThrottle()
-  @Roles(Role.ADMIN, Role.EDITOR)
-  @UseGuards(RolesGuard)
-  @UseGuards(JwtAuthGuard)
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
-  }
-  @SkipThrottle()
   @Patch(':user_id/role')
   @Roles(Role.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)

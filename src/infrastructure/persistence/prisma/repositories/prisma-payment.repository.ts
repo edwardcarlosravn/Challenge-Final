@@ -4,14 +4,10 @@ import { Payment } from 'src/domain/payment';
 import { Prisma, ShopOrder } from '@prisma/client';
 import { PrismaPaymentMapper } from '../mappers/payment-mapper';
 import { PaymentRepository } from 'src/application/contracts/persistence/payment.interface';
-import { ErrorHandlerService } from 'src/infrastructure/common/error-handler.service';
 
 @Injectable()
 export class PrismaPaymentRepository implements PaymentRepository {
-  constructor(
-    private prisma: PrismaService,
-    private readonly errorHandler: ErrorHandlerService,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
   async updatePayment(paymentId: string, data: Payment): Promise<Payment> {
     try {

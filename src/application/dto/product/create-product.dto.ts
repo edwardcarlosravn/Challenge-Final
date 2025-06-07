@@ -1,7 +1,8 @@
+import { Category } from 'src/domain/category';
 export interface CreateProductDto {
   name: string;
   description?: string;
-  categoryIds?: string[];
+  categories?: Category[];
 }
 export interface CreateItemAttributeDto {
   attributeValueId: number;

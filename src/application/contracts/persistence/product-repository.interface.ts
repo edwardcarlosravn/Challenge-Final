@@ -1,6 +1,6 @@
 import { CreateProductWithVariationsDto } from 'src/application/dto/product/create-product.dto';
 import { Product } from 'src/domain/product';
-import { ProductWithCategories } from './interfaces/product-with-categories.interface';
+// import { ProductWithCategories } from './interfaces/product-with-categories.interface';
 import {
   PaginatedResponse,
   PaginationInput,
@@ -9,9 +9,7 @@ import {
 export interface ProductRepository {
   findAll(pagination?: PaginationInput): Promise<PaginatedResponse<Product>>;
   findById(id: string): Promise<Product | null>;
-  getProductsWithCategoriesByIds(
-    productIds: string[],
-  ): Promise<ProductWithCategories[]>;
+  getProductsWithCategoriesByIds(productIds: string[]): Promise<Product[]>;
   createProduct(product: CreateProductWithVariationsDto): Promise<Product>;
   findByCategoryNames(
     categoryNames: string[],

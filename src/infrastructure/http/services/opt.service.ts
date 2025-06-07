@@ -6,7 +6,7 @@ import {
 
 import { OTPType } from '@prisma/client';
 import * as crypto from 'crypto';
-import * as bcrypt from 'bcrypt';
+import * as argon2 from 'argon2';
 import { User } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -23,7 +23,7 @@ export class OTPService {
   async generateToken(user: User, type: OTPType): Promise<string> {
     if (type === OTPType.otp) {
       const otp = crypto.randomInt(100000, 999999).toString();
-      const hashedOTP = await bcrypt.hash(otp, 10);
+      const hashedOTP = await argon2.hash(otp);
       const now = new Date();
       const expiresAt = new Date(now.getTime() + 5 * 60 * 1000);
       try {
@@ -78,7 +78,7 @@ export class OTPService {
       );
     }
 
-    const isMatch = await bcrypt.compare(otpAttempt, storedOtp.token);
+    const isMatch = await argon2.verify(storedOtp.token, otpAttempt);
 
     if (!isMatch) {
       throw new BadRequestException('Invalid OTP. Please try again.');
@@ -94,12 +94,13 @@ export class OTPService {
       });
       return decoded.id;
     } catch (error) {
-      if (error?.name === 'TokenExpiredError') {
-        throw new BadRequestException(
-          'The reset token has expired. Please request a new one.',
-        );
+      if (error instanceof Error) {
+        if (error?.name === 'TokenExpiredError') {
+          throw new BadRequestException(
+            'The reset token has expired. Please request a new one.',
+          );
+        }
       }
-      console.error('Invalid reset token:', error);
       throw new BadRequestException('Invalid or malformed reset token.');
     }
   }

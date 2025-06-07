@@ -4,14 +4,10 @@ import { PrismaService } from '../prisma.service';
 import { ProductVariation } from 'src/domain/variation';
 import { CreateVariationDto } from 'src/application/dto/variation/create-variation.dto';
 import { VariationRepository } from 'src/application/contracts/persistence/productVariation-repository.interface';
-import { ErrorHandlerService } from 'src/infrastructure/common/error-handler.service';
 
 @Injectable()
 export class PrismaVariationRepository implements VariationRepository {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly errorHandler: ErrorHandlerService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
   private readonly includeFullData = {
     items: {
       include: {

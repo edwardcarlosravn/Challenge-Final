@@ -10,7 +10,7 @@ import { ProductType } from '../../entities/product.entity';
 import { CategoryType } from '../../entities/category.entity';
 import { GetProductsUseCase } from 'src/application/use-cases/product/get-product.use-case';
 import { CategoryByProductLoader } from 'src/infrastructure/common/dataloaders/category-by-product.loader';
-import { CreateProduct2UseCase } from 'src/application/use-cases/product/create-product-full.use-case';
+import { CreateProductUseCase } from 'src/application/use-cases/product/create-product-full.use-case';
 import { CreateProductWithVariationsInput } from '../../dto/product/create-product.input';
 import { ProductFiltersInput } from '../../dto/product/product-filters.input';
 import { GetProductsByCategoriesUseCase } from 'src/application/use-cases/product/get-products-by-categories.use-case';
@@ -28,7 +28,7 @@ import { GetProductByIdUseCase } from 'src/application/use-cases/product/get-pro
 @Resolver(() => ProductType)
 export class ProductResolver {
   constructor(
-    private readonly createProductWithVariationsUseCase: CreateProduct2UseCase,
+    private readonly createProductWithVariationsUseCase: CreateProductUseCase,
     private readonly getProductsUseCase: GetProductsUseCase,
     private readonly categoryByProductLoader: CategoryByProductLoader,
     private readonly getProductsByCategoriesUseCase: GetProductsByCategoriesUseCase,
